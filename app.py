@@ -23,19 +23,19 @@ class TokenRequest(BaseModel):
 
 
 @app.get("/")
-def home():
-    return {"status": "running"}
+def root():
+    return {"status": "ok"}
 
 
 @app.post("/verify")
-def verify(request: TokenRequest):
+async def verify(req: TokenRequest):
     try:
         payload = jwt.decode(
-            request.token,
+            req.token,
             PUBLIC_KEY,
             algorithms=["RS256"],
-            issuer=ISSUER,
             audience=AUDIENCE,
+            issuer=ISSUER,
         )
 
         return {
@@ -45,7 +45,7 @@ def verify(request: TokenRequest):
             "aud": payload.get("aud"),
         }
 
-    except Exception:
+    except jwt.PyJWTError:
         return JSONResponse(
             status_code=401,
             content={"valid": False},
